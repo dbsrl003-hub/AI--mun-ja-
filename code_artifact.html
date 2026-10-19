@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수원시장애인종합복지관 - 스마트 안내 문자 생성기</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#111a4a',
+                            primary: '#1a2b6d',
+                            accent: '#167e6c',
+                            tealLight: '#e6f4f1',
+                            bg: '#f8fafc'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 transform translate-y-20 opacity-0 transition-all duration-300 z-50 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center space-x-3 border border-slate-700">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <span id="toast-message" class="text-sm font-medium">복사되었습니다!</span>
+    </div>
+
+    <!-- Header & Configuration Panel -->
+    <header class="bg-brand-dark text-white shadow-md sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <!-- Title & Logo -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-lg bg-brand-accent flex items-center justify-center font-bold text-xl shadow-inner">
+                        <i class="fa-solid fa-comment-sms"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-tight">수원시장애인종합복지관</h1>
+                        <p class="text-xs text-slate-300">스마트 안내 문자 및 소식지 문구 생성기</p>
+                    </div>
+                </div>
+
+                <!-- Global Settings -->
+                <div class="flex items-center space-x-3 text-xs">
+                    <!-- Organization -->
+                    <div class="bg-white/10 p-2 rounded-lg border border-white/10 flex-1 max-w-xs">
+                        <label class="block text-slate-300 font-medium mb-1"><i class="fa-solid fa-sitemap mr-1"></i> 소속 부서/팀</label>
+                        <select id="setting-org" class="w-full bg-slate-800 text-white rounded px-2 py-1 border border-slate-600 focus:outline-none focus:border-brand-accent">
+                            <option value="수원시장애인종합복지관">수원시장애인종합복지관 (기본)</option>
+                            <option value="사례관리팀">사례관리팀</option>
+                            <option value="사회서비스지원팀">사회서비스지원팀</option>
+                            <option value="직업지원팀">직업지원팀</option>
+                            <option value="권익옹호팀">권익옹호팀</option>
+                            <option value="평생교육팀">평생교육팀</option>
+                            <option value="기획운영팀">기획운영팀</option>
+                        </select>
+                    </div>
+
+                    <!-- API Key Management Button -->
+                    <button id="btn-open-apikey-modal" class="bg-white/10 hover:bg-white/20 p-2.5 rounded-lg border border-white/10 text-white flex items-center space-x-2 transition-all">
+                        <i class="fa-solid fa-key text-amber-400"></i>
+                        <span class="font-medium">API 키 설정</span>
+                        <span id="apikey-status-badge" class="px-1.5 py-0.5 text-[10px] rounded font-semibold bg-rose-500/80 text-white">미설정</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mode Selector Tabs -->
+            <div class="flex border-b border-slate-700 mt-5 space-x-2">
+                <button id="tab-template" class="px-5 py-2.5 font-semibold text-sm rounded-t-lg transition-all flex items-center space-x-2 bg-slate-800 text-white border-t-2 border-brand-accent">
+                    <i class="fa-solid fa-clone"></i>
+                    <span>템플릿 방식</span>
+                </button>
+                <button id="tab-ai" class="px-5 py-2.5 font-semibold text-sm rounded-t-lg transition-all flex items-center space-x-2 text-slate-400 hover:text-white hover:bg-slate-800/50">
+                    <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
+                    <span>AI 자동 생성 (Gemini)</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+
+        <!-- MODE 1: TEMPLATE MODE -->
+        <section id="mode-template" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left Side: Template Selector -->
+            <div class="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col h-[680px]">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                    <div class="flex items-center space-x-2">
+                        <span class="p-2 bg-brand-tealLight text-brand-accent rounded-lg text-sm"><i class="fa-solid fa-list-check"></i></span>
+                        <h2 class="font-bold text-slate-800">문자 템플릿 목록</h2>
+                    </div>
+                    <button id="btn-open-add-template" class="px-3 py-1.5 text-xs font-semibold bg-brand-accent hover:bg-teal-700 text-white rounded-lg transition-all flex items-center space-x-1 shadow-sm">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>템플릿 추가</span>
+                    </button>
+                </div>
+
+                <!-- Category Filter -->
+                <div class="flex space-x-1 my-3 overflow-x-auto pb-1 text-xs">
+                    <button class="cat-btn active px-3 py-1.5 rounded-full font-medium bg-brand-primary text-white" data-cat="ALL">전체</button>
+                    <button class="cat-btn px-3 py-1.5 rounded-full font-medium bg-slate-100 text-slate-600 hover:bg-slate-200" data-cat="이용자">이용자</button>
+                    <button class="cat-btn px-3 py-1.5 rounded-full font-medium bg-slate-100 text-slate-600 hover:bg-slate-200" data-cat="활동지원사">활동지원사</button>
+                    <button class="cat-btn px-3 py-1.5 rounded-full font-medium bg-slate-100 text-slate-600 hover:bg-slate-200" data-cat="행정/기타">행정/기타</button>
+                </div>
+
+                <!-- Template List Container -->
+                <div id="template-list" class="flex-grow overflow-y-auto custom-scrollbar space-y-2 pr-1">
+                    <!-- Template cards dynamically loaded via JS -->
+                </div>
+            </div>
+
+            <!-- Right Side: Variable Inputs & Live Preview -->
+            <div class="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Variable Inputs -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col h-[680px]">
+                    <div class="flex items-center space-x-2 pb-4 border-b border-slate-100 mb-4">
+                        <span class="p-2 bg-blue-50 text-brand-primary rounded-lg text-sm"><i class="fa-solid fa-pen-to-square"></i></span>
+                        <h2 class="font-bold text-slate-800">변수 내용 입력</h2>
+                    </div>
+                    <p class="text-xs text-slate-500 mb-4">선택한 템플릿의 <code class="bg-slate-100 px-1 py-0.5 rounded text-rose-600">[변수명]</code>에 들어갈 내용을 입력하세요.</p>
+                    
+                    <div id="variable-fields" class="flex-grow overflow-y-auto custom-scrollbar space-y-4 pr-1">
+                        <div class="text-center py-12 text-slate-400 text-xs">
+                            <i class="fa-regular fa-hand-pointer text-2xl mb-2 block"></i>
+                            왼쪽에서 템플릿을 선택해 주세요.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Real-time Live Preview -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col h-[680px]">
+                    <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+                        <div class="flex items-center space-x-2">
+                            <span class="p-2 bg-emerald-50 text-emerald-600 rounded-lg text-sm"><i class="fa-solid fa-mobile-screen"></i></span>
+                            <h2 class="font-bold text-slate-800">실시간 미리보기</h2>
+                        </div>
+                        <span id="char-count" class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-md font-mono">0자</span>
+                    </div>
+
+                    <!-- Phone Screen Mockup -->
+                    <div class="flex-grow bg-slate-100 rounded-2xl p-4 border border-slate-200 flex flex-col relative overflow-hidden">
+                        <div class="bg-white flex-grow rounded-xl p-4 shadow-sm border border-slate-200 font-sans text-sm text-slate-800 whitespace-pre-wrap overflow-y-auto custom-scrollbar" id="template-preview-text">
+템플릿을 선택하면 미리보기가 작성됩니다.
+                        </div>
+                    </div>
+
+                    <button id="btn-copy-template" class="w-full mt-4 py-3 bg-brand-primary hover:bg-brand-dark text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center space-x-2">
+                        <i class="fa-regular fa-copy"></i>
+                        <span>📋 문자 내용 복사하기</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- MODE 2: AI AUTOMATIC GENERATION MODE -->
+        <section id="mode-ai" class="hidden space-y-6">
+            <!-- Prompt Input Area -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div class="flex items-center space-x-3 mb-4">
+                    <span class="p-2 bg-amber-50 text-amber-600 rounded-lg text-lg"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+                    <div>
+                        <h2 class="font-bold text-slate-800 text-lg">AI 안내 문자 생성하기</h2>
+                        <p class="text-xs text-slate-500">핵심 전달 내용만 간단히 작성해주시면 정중한 복지관 안내 문자 2가지 안을 생성합니다.</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <textarea id="ai-prompt" rows="3" placeholder="예: 10월 12일 화요일 오후 2시 2층 프로그램실에서 노래교실 시작합니다. 준비물은 개인 컵입니다. 주차공간이 협소하니 대중교통 이용 부탁드립니다." class="w-full p-4 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-accent focus:border-transparent outline-none text-sm leading-relaxed"></textarea>
+                    
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
+                        <div class="flex items-center space-x-2 text-xs text-slate-500">
+                            <i class="fa-solid fa-circle-info text-brand-accent"></i>
+                            <span>상단에서 설정한 <b>[소속 부서]</b> 정보가 반영됩니다.</span>
+                        </div>
+                        <button id="btn-generate-ai" class="w-full sm:w-auto px-6 py-3 bg-brand-accent hover:bg-teal-700 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>AI 문구 생성 요청</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div id="ai-loading" class="hidden bg-white rounded-2xl border border-slate-200 p-12 text-center">
+                <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-slate-200 border-t-brand-accent mb-4"></div>
+                <h3 class="font-bold text-slate-700">AI가 문자를 생성하고 있습니다...</h3>
+                <p class="text-xs text-slate-400 mt-1">입력하신 내용을 바탕으로 정중한 안내 문구를 다듬는 중입니다.</p>
+            </div>
+
+            <!-- AI Results Grid (Cards <1안> & <2안>) -->
+            <div id="ai-results" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Card 1 -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col h-[480px]">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+                        <span class="px-3 py-1 bg-blue-50 text-brand-primary text-xs font-bold rounded-full border border-blue-100">
+                            <i class="fa-solid fa-envelope-open-text mr-1"></i> &lt;1안&gt; 기본 명확형
+                        </span>
+                        <span id="char-count-1" class="text-xs text-slate-400 font-mono">0자</span>
+                    </div>
+                    <div class="flex-grow bg-slate-50 rounded-xl p-4 border border-slate-200 font-sans text-sm text-slate-800 whitespace-pre-wrap overflow-y-auto custom-scrollbar" id="ai-card-1-text">
+AI 생성 요청 시 이곳에 &lt;1안&gt; 결과가 표시됩니다.
+                    </div>
+                    <button id="btn-copy-ai-1" class="w-full mt-4 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-sm font-semibold rounded-xl transition-all flex items-center justify-center space-x-2">
+                        <i class="fa-regular fa-copy"></i>
+                        <span>📋 1안 복사하기</span>
+                    </button>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col h-[480px]">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+                        <span class="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-100">
+                            <i class="fa-solid fa-heart mr-1"></i> &lt;2안&gt; 친근 안내형
+                        </span>
+                        <span id="char-count-2" class="text-xs text-slate-400 font-mono">0자</span>
+                    </div>
+                    <div class="flex-grow bg-slate-50 rounded-xl p-4 border border-slate-200 font-sans text-sm text-slate-800 whitespace-pre-wrap overflow-y-auto custom-scrollbar" id="ai-card-2-text">
+AI 생성 요청 시 이곳에 &lt;2안&gt; 결과가 표시됩니다.
+                    </div>
+                    <button id="btn-copy-ai-2" class="w-full mt-4 py-2.5 bg-brand-accent hover:bg-teal-700 text-white text-sm font-semibold rounded-xl transition-all flex items-center justify-center space-x-2">
+                        <i class="fa-regular fa-copy"></i>
+                        <span>📋 2안 복사하기</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal: Add Custom Template -->
+    <div id="modal-template" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 class="font-bold text-slate-800 text-lg" id="modal-title">새 템플릿 추가</h3>
+                <button id="btn-close-modal" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-4 my-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">카테고리</label>
+                    <select id="tpl-category" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-brand-accent">
+                        <option value="이용자">이용자</option>
+                        <option value="활동지원사">활동지원사</option>
+                        <option value="행정/기타">행정/기타</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">템플릿 제목</label>
+                    <input type="text" id="tpl-title" placeholder="예: 서비스 신청 서류 안내" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-brand-accent">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">템플릿 본문 (<code class="text-rose-600">[변수명]</code> 입력 가능)</label>
+                    <textarea id="tpl-content" rows="6" placeholder="안녕하세요 [이름]님, [날짜]에 예정된 [프로그램명] 안내드립니다..." class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-brand-accent"></textarea>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100">
+                <button id="btn-cancel-modal" class="px-4 py-2 text-xs font-semibold bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200">취소</button>
+                <button id="btn-save-template" class="px-4 py-2 text-xs font-semibold bg-brand-primary text-white rounded-lg hover:bg-brand-dark">저장하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Gemini API Key Setup & Guide -->
+    <div id="modal-apikey" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center space-x-2">
+                    <span class="p-2 bg-amber-100 text-amber-600 rounded-lg text-base"><i class="fa-solid fa-key"></i></span>
+                    <h3 class="font-bold text-slate-800 text-lg">Gemini API 키 등록</h3>
+                </div>
+                <button id="btn-close-apikey-modal" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div class="my-4 space-y-4">
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    AI 자동 문자 작성 기능을 이용하기 위해 Google Gemini API 키가 필요합니다.<br>
+                    입력하신 API 키는 서버에 저장되지 않고 <b>사용자의 브라우저에만 안전하게 보관</b>됩니다.
+                </p>
+
+                <!-- API Key Input Field -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">API 키 입력</label>
+                    <div class="relative">
+                        <input type="password" id="modal-input-apikey" placeholder="AIzaSy..." class="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-accent pr-10">
+                        <button id="modal-toggle-apikey" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step by Step Guide Section -->
+                <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 text-xs text-slate-700 space-y-2">
+                    <h4 class="font-bold text-brand-primary flex items-center">
+                        <i class="fa-solid fa-circle-question mr-1.5 text-amber-500"></i> API 키 무료 발급받는 방법
+                    </h4>
+                    <ol class="list-decimal list-inside space-y-1.5 pl-1 leading-relaxed">
+                        <li>구글 계정에 로그인한 상태에서 <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-brand-accent font-bold underline hover:text-teal-700">Google AI Studio <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a> 접속</li>
+                        <li><b>[Create API key]</b> 또는 <b>[Get API key]</b> 버튼 클릭</li>
+                        <li>생성된 팝업 창에서 생성 버튼을 누르고 <b>API 키 복사</b></li>
+                        <li>위 입력 칸에 붙여넣기 후 <b>[저장 및 시작하기]</b> 버튼 클릭</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+                <button id="btn-skip-apikey" class="px-4 py-2.5 text-xs font-semibold bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200">나중에 하기 (템플릿만 사용)</button>
+                <button id="btn-save-apikey" class="px-5 py-2.5 text-xs font-bold bg-brand-primary text-white rounded-xl hover:bg-brand-dark shadow-md">저장 및 시작하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Default System Templates
+        const DEFAULT_TEMPLATES = [
+            {
+                id: 'tpl_1',
+                category: '이용자',
+                title: '상담/방문 일정 안내',
+                content: '[이름] 이용자님 안녕하세요.\n수원시장애인종합복지관 [소속부서]입니다.\n\n신청하신 서비스 상담을 위해 아래 일정으로 방문 드릴 예정입니다.\n\n- 일시: [날짜] [시간]\n- 장소: [장소]\n\n일정 변경이 필요하시면 미리 연락해 주세요.\n감사합니다.'
+            },
+            {
+                id: 'tpl_2',
+                category: '이용자',
+                title: '프로그램 참여 안내',
+                content: '[이름]님 안녕하세요.\n수원시장애인종합복지관에서 안내드립니다.\n\n신청하신 [[프로그램명]] 프로그램이 아래와 같이 진행됩니다.\n\n- 일시: [일시]\n- 장소: [장소]\n- 준비물: [준비물]\n\n원활한 진행을 위해 시간을 준수해 주시기 바랍니다.'
+            },
+            {
+                id: 'tpl_3',
+                category: '활동지원사',
+                title: '활동지원사 보수교육 안내',
+                content: '[이름] 활동지원사님 안녕하세요.\n수원시장애인종합복지관 [소속부서]입니다.\n\n아래와 같이 활동지원사 보수교육이 진행될 예정이오니 확인 후 참석 부탁드립니다.\n\n- 교육명: [교육명]\n- 일시: [일시]\n- 장소: [장소]\n\n원활한 교육 진행을 위해 10분 전까지 입실해 주시기 바랍니다.'
+            },
+            {
+                id: 'tpl_4',
+                category: '활동지원사',
+                title: '제출 서류 안내',
+                content: '[이름] 활동지원사님 안녕하세요.\n수원시장애인종합복지관에서 안내드립니다.\n\n[월] 활동과 관련하여 제출 필요 서류를 안내해 드립니다.\n\n- 제출 서류: [서류명]\n- 제출 기한: [제출기한]\n- 제출 방법: [제출방법]\n\n기한 내 제출 부탁드리며, 문의사항은 연락 바랍니다.'
+            },
+            {
+                id: 'tpl_5',
+                category: '행정/기타',
+                title: '휴관 및 시설 이용 안내',
+                content: '[수원시장애인종합복지관 휴관 안내]\n\n복지관 이용인 및 보호자 여러분 안녕하십니까.\n[사유]로 인하여 아래와 같이 복지관이 휴관함을 안내해 드립니다.\n\n- 휴관 기간: [휴관기간]\n- 대상 시설: 복지관 전체 시설\n\n이용에 불편을 드려 양해 부탁드립니다.'
+            }
+        ];
+
+        // State Management
+        let templates = [];
+        let selectedTemplateId = null;
+        let activeCategory = 'ALL';
+        let currentValues = {};
+
+        // DOM Elements
+        const elSettingOrg = document.getElementById('setting-org');
+        const elApikeyStatusBadge = document.getElementById('apikey-status-badge');
+
+        const elModalApiKey = document.getElementById('modal-apikey');
+        const elModalInputApiKey = document.getElementById('modal-input-apikey');
+        const elModalToggleApiKey = document.getElementById('modal-toggle-apikey');
+        const elBtnOpenApiKeyModal = document.getElementById('btn-open-apikey-modal');
+        const elBtnCloseApiKeyModal = document.getElementById('btn-close-apikey-modal');
+        const elBtnSaveApiKey = document.getElementById('btn-save-apikey');
+        const elBtnSkipApiKey = document.getElementById('btn-skip-apikey');
+
+        const elModeTemplate = document.getElementById('mode-template');
+        const elModeAi = document.getElementById('mode-ai');
+        const elTabTemplate = document.getElementById('tab-template');
+        const elTabAi = document.getElementById('tab-ai');
+
+        const elTemplateList = document.getElementById('template-list');
+        const elVariableFields = document.getElementById('variable-fields');
+        const elTemplatePreviewText = document.getElementById('template-preview-text');
+        const elCharCount = document.getElementById('char-count');
+
+        const elAiPrompt = document.getElementById('ai-prompt');
+        const elBtnGenerateAi = document.getElementById('btn-generate-ai');
+        const elAiLoading = document.getElementById('ai-loading');
+        const elAiResults = document.getElementById('ai-results');
+        const elAiCard1Text = document.getElementById('ai-card-1-text');
+        const elAiCard2Text = document.getElementById('ai-card-2-text');
+
+        // Initial Load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+            loadTemplates();
+            renderTemplates();
+            setupEventListeners();
+            checkApiKeyOnFirstLoad();
+        });
+
+        // Load Settings from LocalStorage
+        function loadSettings() {
+            const apiKey = localStorage.getItem('welfare_api_key') || '';
+            const org = localStorage.getItem('welfare_org') || '수원시장애인종합복지관';
+
+            elModalInputApiKey.value = apiKey;
+            elSettingOrg.value = org;
+
+            updateApiKeyBadge(apiKey);
+        }
+
+        // Update API Key Status Badge UI
+        function updateApiKeyBadge(apiKey) {
+            if (apiKey && apiKey.trim().length > 5) {
+                elApikeyStatusBadge.textContent = '등록됨';
+                elApikeyStatusBadge.className = 'px-1.5 py-0.5 text-[10px] rounded font-semibold bg-emerald-500 text-white';
+            } else {
+                elApikeyStatusBadge.textContent = '미설정';
+                elApikeyStatusBadge.className = 'px-1.5 py-0.5 text-[10px] rounded font-semibold bg-rose-500/80 text-white';
+            }
+        }
+
+        // Save Org Setting
+        function saveSettings() {
+            localStorage.setItem('welfare_org', elSettingOrg.value);
+            updatePreview();
+        }
+
+        // Check Key on Startup
+        function checkApiKeyOnFirstLoad() {
+            const apiKey = localStorage.getItem('welfare_api_key');
+            if (!apiKey) {
+                elModalApiKey.classList.remove('hidden');
+            }
+        }
+
+        // Load Custom/Default Templates
+        function loadTemplates() {
+            const stored = localStorage.getItem('welfare_templates');
+            if (stored) {
+                try {
+                    templates = JSON.parse(stored);
+                } catch(e) {
+                    templates = [...DEFAULT_TEMPLATES];
+                }
+            } else {
+                templates = [...DEFAULT_TEMPLATES];
+                localStorage.setItem('welfare_templates', JSON.stringify(templates));
+            }
+        }
+
+        // Save Templates
+        function saveTemplatesToStorage() {
+            localStorage.setItem('welfare_templates', JSON.stringify(templates));
+        }
+
+        // Render Template List
+        function renderTemplates() {
+            elTemplateList.innerHTML = '';
+
+            const filtered = activeCategory === 'ALL' 
+                ? templates 
+                : templates.filter(t => t.category === activeCategory);
+
+            if (filtered.length === 0) {
+                elTemplateList.innerHTML = `<div class="text-center py-8 text-xs text-slate-400">등록된 템플릿이 없습니다.</div>`;
+                return;
+            }
+
+            filtered.forEach(t => {
+                const card = document.createElement('div');
+                const isSelected = t.id === selectedTemplateId;
+                card.className = `p-3.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
+                    isSelected 
+                    ? 'border-brand-accent bg-teal-50/50 shadow-sm' 
+                    : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+                }`;
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-600">${t.category}</span>
+                        ${!t.id.startsWith('tpl_') ? `
+                            <button onclick="deleteTemplate(event, '${t.id}')" class="text-slate-400 hover:text-rose-500 text-xs px-1">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-sm mb-1">${t.title}</h3>
+                    <p class="text-xs text-slate-500 line-clamp-2">${t.content}</p>
+                `;
+
+                card.addEventListener('click', () => selectTemplate(t.id));
+                elTemplateList.appendChild(card);
+            });
+        }
+
+        // Select Template
+        function selectTemplate(id) {
+            selectedTemplateId = id;
+            renderTemplates();
+
+            const tpl = templates.find(t => t.id === id);
+            if (!tpl) return;
+
+            // Extract variable placeholders e.g. [변수명]
+            const regex = /\[(.*?)\]/g;
+            let match;
+            const vars = new Set();
+            while ((match = regex.exec(tpl.content)) !== null) {
+                if (match[1] !== '소속부서') {
+                    vars.add(match[1]);
+                }
+            }
+
+            renderVariableInputs(Array.from(vars));
+            updatePreview();
+        }
+
+        // Render Variable Inputs dynamically
+        function renderVariableInputs(vars) {
+            elVariableFields.innerHTML = '';
+            currentValues = {};
+
+            if (vars.length === 0) {
+                elVariableFields.innerHTML = `
+                    <div class="p-4 rounded-xl bg-slate-50 text-slate-500 text-xs text-center border border-slate-200">
+                        이 템플릿은 별도 입력 변수가 없습니다.
+                    </div>
+                `;
+                return;
+            }
+
+            vars.forEach(v => {
+                const wrap = document.createElement('div');
+                wrap.className = 'space-y-1';
+                wrap.innerHTML = `
+                    <label class="block text-xs font-bold text-slate-700">
+                        <span class="text-rose-500">*</span> [${v}]
+                    </label>
+                    <input type="text" data-var="${v}" placeholder="${v} 내용 입력" class="var-input w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:bg-white focus:border-brand-primary">
+                `;
+                elVariableFields.appendChild(wrap);
+            });
+
+            document.querySelectorAll('.var-input').forEach(input => {
+                input.addEventListener('input', (e) => {
+                    const varName = e.target.getAttribute('data-var');
+                    currentValues[varName] = e.target.value;
+                    updatePreview();
+                });
+            });
+        }
+
+        // Update Live Preview Box
+        function updatePreview() {
+            if (!selectedTemplateId) return;
+            const tpl = templates.find(t => t.id === selectedTemplateId);
+            if (!tpl) return;
+
+            let result = tpl.content;
+
+            const orgVal = elSettingOrg.value.trim() || '수원시장애인종합복지관';
+
+            result = result.replace(/\[소속부서\]/g, orgVal);
+
+            Object.keys(currentValues).forEach(v => {
+                const val = currentValues[v];
+                const reg = new RegExp(`\\[${v}\\]`, 'g');
+                result = result.replace(reg, val ? val : `[${v}]`);
+            });
+
+            elTemplatePreviewText.textContent = result;
+            elCharCount.textContent = `${result.length}자`;
+        }
+
+        // Delete Custom Template
+        window.deleteTemplate = function(e, id) {
+            e.stopPropagation();
+            if (confirm('해당 템플릿을 삭제하시겠습니까?')) {
+                templates = templates.filter(t => t.id !== id);
+                if (selectedTemplateId === id) {
+                    selectedTemplateId = null;
+                    elVariableFields.innerHTML = '<div class="text-center py-12 text-slate-400 text-xs">왼쪽에서 템플릿을 선택해 주세요.</div>';
+                    elTemplatePreviewText.textContent = '템플릿을 선택하면 미리보기가 작성됩니다.';
+                    elCharCount.textContent = '0자';
+                }
+                saveTemplatesToStorage();
+                renderTemplates();
+                showToast('템플릿이 삭제되었습니다.');
+            }
+        };
+
+        // Event Listeners Setup
+        function setupEventListeners() {
+            elSettingOrg.addEventListener('change', saveSettings);
+
+            // API Key Modal Controls
+            elBtnOpenApiKeyModal.addEventListener('click', () => {
+                elModalApiKey.classList.remove('hidden');
+            });
+
+            elBtnCloseApiKeyModal.addEventListener('click', () => {
+                elModalApiKey.classList.add('hidden');
+            });
+
+            elBtnSkipApiKey.addEventListener('click', () => {
+                elModalApiKey.classList.add('hidden');
+            });
+
+            elBtnSaveApiKey.addEventListener('click', () => {
+                const key = elModalInputApiKey.value.trim();
+                localStorage.setItem('welfare_api_key', key);
+                updateApiKeyBadge(key);
+                elModalApiKey.classList.add('hidden');
+                showToast('API 키가 저장되었습니다.');
+            });
+
+            elModalToggleApiKey.addEventListener('click', () => {
+                const isPass = elModalInputApiKey.type === 'password';
+                elModalInputApiKey.type = isPass ? 'text' : 'password';
+                elModalToggleApiKey.innerHTML = isPass ? '<i class="fa-solid fa-eye-slash"></i>' : '<i class="fa-solid fa-eye"></i>';
+            });
+
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.cat-btn').forEach(b => {
+                        b.classList.remove('active', 'bg-brand-primary', 'text-white');
+                        b.classList.add('bg-slate-100', 'text-slate-600');
+                    });
+                    btn.classList.add('active', 'bg-brand-primary', 'text-white');
+                    btn.classList.remove('bg-slate-100', 'text-slate-600');
+                    activeCategory = btn.getAttribute('data-cat');
+                    renderTemplates();
+                });
+            });
+
+            elTabTemplate.addEventListener('click', () => {
+                elTabTemplate.className = 'px-5 py-2.5 font-semibold text-sm rounded-t-lg transition-all flex items-center space-x-2 bg-slate-800 text-white border-t-2 border-brand-accent';
+                elTabAi.className = 'px-5 py-2.5 font-semibold text-sm rounded-t-lg transition-all flex items-center space-x-2 text-slate-400 hover:text-white hover:bg-slate-800/50';
+                elModeTemplate.classList.remove('hidden');
+                elModeAi.classList.add('hidden');
+            });
+
+            elTabAi.addEventListener('click', () => {
+                elTabAi.className = 'px-5 py-2.5 font-semibold text-sm rounded-t-lg transition-all flex items-center space-x-2 bg-slate-800 text-white border-t-2 border-brand-accent';
+                elTabTemplate.className = 'px-5 py-2.5 font-semibold text-sm rounded-t-lg transition-all flex items-center space-x-2 text-slate-400 hover:text-white hover:bg-slate-800/50';
+                elModeAi.classList.remove('hidden');
+                elModeTemplate.classList.add('hidden');
+
+                // Alert if API key is missing
+                const apiKey = localStorage.getItem('welfare_api_key');
+                if (!apiKey) {
+                    elModalApiKey.classList.remove('hidden');
+                }
+            });
+
+            const modal = document.getElementById('modal-template');
+            document.getElementById('btn-open-add-template').addEventListener('click', () => {
+                modal.classList.remove('hidden');
+            });
+            document.getElementById('btn-close-modal').addEventListener('click', () => modal.classList.add('hidden'));
+            document.getElementById('btn-cancel-modal').addEventListener('click', () => modal.classList.add('hidden'));
+
+            document.getElementById('btn-save-template').addEventListener('click', () => {
+                const cat = document.getElementById('tpl-category').value;
+                const title = document.getElementById('tpl-title').value.trim();
+                const content = document.getElementById('tpl-content').value.trim();
+
+                if (!title || !content) {
+                    alert('템플릿 제목과 본문을 입력해 주세요.');
+                    return;
+                }
+
+                const newTpl = {
+                    id: 'custom_' + Date.now(),
+                    category: cat,
+                    title: title,
+                    content: content
+                };
+
+                templates.unshift(newTpl);
+                saveTemplatesToStorage();
+                renderTemplates();
+                selectTemplate(newTpl.id);
+
+                modal.classList.add('hidden');
+                document.getElementById('tpl-title').value = '';
+                document.getElementById('tpl-content').value = '';
+                showToast('새 템플릿이 저장되었습니다.');
+            });
+
+            document.getElementById('btn-copy-template').addEventListener('click', () => {
+                const text = elTemplatePreviewText.textContent.trim();
+                if (!text || text === '템플릿을 선택하면 미리보기가 작성됩니다.') return;
+                copyToClipboard(text);
+            });
+
+            document.getElementById('btn-copy-ai-1').addEventListener('click', () => {
+                const text = elAiCard1Text.textContent.trim();
+                if (text && !text.includes('표시됩니다')) copyToClipboard(text);
+            });
+
+            document.getElementById('btn-copy-ai-2').addEventListener('click', () => {
+                const text = elAiCard2Text.textContent.trim();
+                if (text && !text.includes('표시됩니다')) copyToClipboard(text);
+            });
+
+            elBtnGenerateAi.addEventListener('click', generateAiMessages);
+        }
+
+        // Gemini API Request Function
+        async function generateAiMessages() {
+            const apiKey = (localStorage.getItem('welfare_api_key') || '').trim();
+            const userPrompt = elAiPrompt.value.trim();
+            const orgVal = elSettingOrg.value.trim() || '수원시장애인종합복지관';
+
+            if (!apiKey) {
+                alert('AI 기능을 사용하려면 먼저 Gemini API 키를 설정해주세요.');
+                elModalApiKey.classList.remove('hidden');
+                return;
+            }
+
+            if (!userPrompt) {
+                alert('안내 문자 생성을 위한 핵심 내용을 입력해 주세요.');
+                elAiPrompt.focus();
+                return;
+            }
+
+            elAiLoading.classList.remove('hidden');
+            elAiResults.classList.add('hidden');
+
+            const systemInstruction = `당신은 수원시장애인종합복지관의 친절하고 정중한 사회복지사입니다. 사용자의 요청을 바탕으로 장애인 이용자 및 보호자에게 발송할 안내 문자 메시지를 오직 <1안>과 <2안> 두 가지 형태의 한국어 문자 본문만 작성하세요.
+
+작성 규칙:
+1. 기관명은 [${orgVal}]을 참고하여 자연스럽게 언급하세요. 발신자 개인 이름/직함 정보는 포함하지 마세요.
+2. <1안>은 명확하고 격식 있는 텍스트 형태, <2안>은 따뜻하고 친근한 텍스트 형태로 작성하세요.
+3. 프롬프트 분석, 생각 과정(Reasoning/Thought Process), 영어 텍스트, 설명글, 인사말(‘네 안내드립니다’ 등)은 절대로 출력하지 마세요.
+4. 출력 형식은 정확히 아래 포맷만 준수하세요:
+
+<1안>
+(1안 문자 본문 내용)
+
+<2안>
+(2안 문자 본문 내용)`;
+
+            const modelName = 'gemini-3-flash-preview';
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+
+            try {
+                const payload = {
+                    contents: [
+                        { role: 'user', parts: [{ text: userPrompt }] }
+                    ],
+                    systemInstruction: {
+                        parts: [{ text: systemInstruction }]
+                    }
+                };
+
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                    if (responseText) {
+                        parseAndDisplayAiResponse(responseText);
+                        elAiResults.classList.remove('hidden');
+                    } else {
+                        alert('AI 응답이 비어있습니다. 다시 시도해 주세요.');
+                    }
+                } else {
+                    const errData = await res.json().catch(() => ({}));
+                    alert(`API 요청 실패 (${res.status}): ${errData.error?.message || 'API 키를 확인해주세요.'}`);
+                    elModalApiKey.classList.remove('hidden');
+                }
+            } catch (e) {
+                console.error('Gemini API Fetch Error:', e);
+                alert('네트워크 오류가 발생했습니다. 통신 상태를 확인해주세요.');
+            } finally {
+                elAiLoading.classList.add('hidden');
+            }
+        }
+
+        // JS Response Parsing Logic
+        function parseAndDisplayAiResponse(rawText) {
+            let option1 = '';
+            let option2 = '';
+
+            const match1 = rawText.match(/<1안>([\s\S]*?)(?=<2안>|$)/);
+            const match2 = rawText.match(/<2안>([\s\S]*?)$/);
+
+            if (match1 && match1[1]) {
+                option1 = match1[1].trim();
+            }
+            if (match2 && match2[1]) {
+                option2 = match2[1].trim();
+            }
+
+            if (!option1 && !option2) {
+                const parts = rawText.split('\n\n');
+                option1 = parts.slice(0, Math.ceil(parts.length / 2)).join('\n\n').trim();
+                option2 = parts.slice(Math.ceil(parts.length / 2)).join('\n\n').trim();
+            }
+
+            elAiCard1Text.textContent = option1 || rawText;
+            elAiCard2Text.textContent = option2 || '2안 생성 결과가 없습니다.';
+
+            document.getElementById('char-count-1').textContent = `${(option1 || rawText).length}자`;
+            document.getElementById('char-count-2').textContent = `${(option2 || '').length}자`;
+        }
+
+        // Clipboard Helper
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast('클립보드에 문자 내용이 복사되었습니다!');
+            } catch (err) {
+                alert('복사하기 실패: ' + err);
+            }
+            document.body.removeChild(textarea);
+        }
+
+        // Toast Notification Helper
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
