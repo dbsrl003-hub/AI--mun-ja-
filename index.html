@@ -417,7 +417,7 @@
             }
         };
 
-        // Supabase 서버에서 템플릿 목록 불러오기 (서버에 데이터가 있으면 그대로 출력)
+        // Supabase 서버에서 템플릿 목록 불러오기 (서버 데이터 우선 100% 보장)
         async function loadTemplatesFromSupabase() {
             try {
                 const { data, error } = await supabaseClient
@@ -427,14 +427,12 @@
                 if (error) throw error;
 
                 if (!data || data.length === 0) {
-                    // 서버가 완전히 비어있을 때만 기본 템플릿 삽입
                     for (const t of DEFAULT_TEMPLATES) {
                         await supabaseClient.from('templates').insert([t]);
                     }
                     templates = [...DEFAULT_TEMPLATES];
                 } else {
-                    // 서버에 저장된 템플릿들을 그대로 가져옴
-                    templates = data;
+                    templates = data; // Supabase에 저장된 모든 데이터 반영
                 }
             } catch (err) {
                 console.error('Supabase 데이터 로드 실패:', err);
@@ -450,8 +448,10 @@
             const listEl = document.getElementById('template-list');
             listEl.innerHTML = '';
 
+            // 카테고리 필터링 완벽 대응 ('행정기타' 버튼 클릭 시 '행정/기타' 데이터도 매칭)
             const filtered = templates.filter(t => {
                 if (currentFilter === 'all') return true;
+                if (currentFilter === '행정기타') return t.category === '행정/기타' || t.category === '행정기타';
                 return t.category === currentFilter;
             });
 
@@ -469,7 +469,7 @@
                 let badgeColor = 'bg-slate-100 text-slate-600';
                 if (t.category === '이용자') badgeColor = 'bg-blue-50 text-blue-700 border border-blue-100';
                 else if (t.category === '활동지원사') badgeColor = 'bg-teal-50 text-teal-700 border border-teal-100';
-                else if (t.category === '행정/기타') badgeColor = 'bg-amber-50 text-amber-700 border border-amber-100';
+                else if (t.category === '행정/기타' || t.category === '행정기타') badgeColor = 'bg-amber-50 text-amber-700 border border-amber-100';
 
                 card.innerHTML = `
                     <div class="flex justify-between items-start">
@@ -543,7 +543,6 @@
             updatePreview();
         }
 
-        // 완성된 최종 문자열 반환 함수 (클립보드 복사 및 문자함 저장 공용)
         function getProcessedMessageText() {
             const t = templates.find(item => item.id === currentSelectedTemplateId);
             if (!t) return '';
@@ -574,7 +573,6 @@
                 text = text.replaceAll(`[${varName}]`, val);
             });
 
-            // 화면 표시용: 대괄호 변수 부분만 파란색 스타일로 강조
             const escapedText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
             const highlightedText = escapedText.replace(/\[(.*?)\]/g, '<span class="text-blue-600 font-bold bg-blue-50 px-1 py-0.5 rounded border border-blue-100">[$1]</span>');
             
@@ -668,7 +666,6 @@
             }
         }
 
-        // 복사할 때는 색상 태그가 없는 순수 일반 텍스트로 복사됨
         function copyTemplateMessage() {
             const text = getProcessedMessageText();
             if (!text || text.includes('템플릿을 선택')) {
@@ -697,9 +694,6 @@
             }
         }
 
-        // ==========================================
-        // ☁️ 개인 문자함 관리 및 수정 기능
-        // ==========================================
         async function loadSavedMessagesFromSupabase() {
             try {
                 const { data, error } = await supabaseClient
@@ -723,7 +717,7 @@
             let title = '저장된 문자';
 
             if (mode === 'template') {
-                text = getProcessedMessageText(); // 순수 텍스트로 저장
+                text = getProcessedMessageText();
                 const t = templates.find(item => item.id === currentSelectedTemplateId);
                 if (t) title = t.title;
             }
@@ -905,9 +899,6 @@
             }
         }
 
-        // ==========================================
-        // AI 초안 관련 로직
-        // ==========================================
         async function generateAiDraft() {
             if (!apiKey) {
                 openApiKeyModal();
@@ -1038,9 +1029,6 @@
             });
         }
 
-        // ==========================================
-        // API 키 모달 관련
-        // ==========================================
         function openApiKeyModal() {
             document.getElementById('api-key-input').value = apiKey;
             document.getElementById('api-modal').classList.remove('hidden');
@@ -1060,7 +1048,7 @@
             localStorage.setItem('suwon_gemini_api_key', apiKey);
             updateApiStatusBadge();
             closeApiKeyModal();
-            showToast('API 키가 안전하게 저장되어 있습니다.');
+            showToast('API 키가 안전하게 저장되었습니다.');
         }
 
         function skipApiKey() {
