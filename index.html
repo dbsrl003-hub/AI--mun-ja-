@@ -67,7 +67,7 @@
             </button>
         </div>
 
-        <!-- [탭 1] 템플릿 문자 작성 영역 (3분할 레이아웃: 선택 ➔ 변수 입력 ➔ 미리보기) -->
+        <!-- [탭 1] 템플릿 문자 작성 영역 -->
         <div id="tab-content-template" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
             <!-- [1] 왼쪽 영역: 템플릿 선택 -->
@@ -141,7 +141,7 @@
                         </div>
                     </div>
 
-                    <!-- 액션 버튼 (위아래 배치) -->
+                    <!-- 액션 버튼 -->
                     <div class="flex flex-col gap-2.5">
                         <button onclick="copyTemplateMessage()" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-medium py-3 px-4 rounded-xl transition shadow-sm hover:shadow flex items-center justify-center gap-2 text-sm">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
@@ -358,7 +358,7 @@
     <!-- 자바스크립트 로직 -->
     <script>
         const SUPABASE_URL = 'https://hnwwgjdjrxkgguudockp.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhud3dnamRqcnhrZ2d1dWRvY2twIkwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0NTI3ODIsImV4cCI6MjEwODAyODc4Mn0.lXR_AxaDxqFY1TvCZ1azM1LXWSIUUqsU43O6rzB1tec';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhud3dnamRqcnhrZ2d1dWRvY2twIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0NTI3ODIsImV4cCI6MjEwODAyODc4Mn0.lXR_AxaDxqFY1TvCZ1azM1LXWSIUUqsU43O6rzB1tec';
         
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
