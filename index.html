@@ -78,8 +78,8 @@
                             <span class="w-2.5 h-2.5 rounded-full bg-teal-600"></span>
                             템플릿 선택
                         </h2>
-                        <div class="flex gap-2">
-                            <button onclick="resetDefaultTemplates()" class="text-[11px] text-slate-400 hover:text-teal-600 underline">초기복원</button>
+                        <!-- 초기복원 버튼 삭제 완료 -->
+                        <div>
                             <button onclick="openTemplateModal('add')" class="bg-teal-600 hover:bg-teal-700 text-white text-xs px-2.5 py-1 rounded-lg font-medium transition shadow-sm flex items-center gap-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                 추가
@@ -135,7 +135,7 @@
                             <span class="text-[11px] bg-teal-50 text-teal-700 px-2 py-0.5 rounded-full font-medium border border-teal-100">실시간 반영</span>
                         </div>
 
-                        <!-- 문자 출력 박스 -->
+                        <!-- 문자 출력 박스 (변수 파란색 강조 표시) -->
                         <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4 h-[420px] overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed text-slate-700 shadow-inner" id="preview-box">
                             왼쪽에서 템플릿을 선택해 주세요.
                         </div>
@@ -358,7 +358,7 @@
     <!-- 자바스크립트 로직 -->
     <script>
         const SUPABASE_URL = 'https://hnwwgjdjrxkgguudockp.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhud3dnamRqcnhrZ2d1dWRvY2twIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0NTI3ODIsImV4cCI6MjEwODAyODc4Mn0.lXR_AxaDxqFY1TvCZ1azM1LXWSIUUqsU43O6rzB1tec';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhud3dnamRqcnhrZ2d1dWRvY2twIkwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0NTI3ODIsImV4cCI6MjEwODAyODc4Mn0.lXR_AxaDxqFY1TvCZ1azM1LXWSIUUqsU43O6rzB1tec';
         
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -441,21 +441,6 @@
             renderTemplateList();
             if (templates.length > 0) {
                 selectTemplate(templates[0].id);
-            }
-        }
-
-        async function resetDefaultTemplates() {
-            if (confirm('기본 템플릿으로 초기화하시겠습니까? (클라우드 데이터가 초기화됩니다)')) {
-                try {
-                    await supabaseClient.from('templates').delete().neq('id', '0');
-                    for (const t of DEFAULT_TEMPLATES) {
-                        await supabaseClient.from('templates').insert([t]);
-                    }
-                    await loadTemplatesFromSupabase();
-                    showToast('클라우드 템플릿이 초기화되었습니다.');
-                } catch (err) {
-                    alert('초기화 중 오류 발생: ' + err.message);
-                }
             }
         }
 
@@ -556,6 +541,21 @@
             updatePreview();
         }
 
+        // 완성된 최종 문자열 반환 함수 (클립보드 복사 및 문자함 저장 공용)
+        function getProcessedMessageText() {
+            const t = templates.find(item => item.id === currentSelectedTemplateId);
+            if (!t) return '';
+
+            let text = t.content;
+            const varInputs = document.querySelectorAll('.var-input');
+            varInputs.forEach(input => {
+                const varName = input.getAttribute('data-var');
+                const val = input.value.trim() || `[${varName}]`;
+                text = text.replaceAll(`[${varName}]`, val);
+            });
+            return text;
+        }
+
         function updatePreview() {
             const t = templates.find(item => item.id === currentSelectedTemplateId);
             const previewBox = document.getElementById('preview-box');
@@ -572,7 +572,11 @@
                 text = text.replaceAll(`[${varName}]`, val);
             });
 
-            previewBox.textContent = text;
+            // 화면 표시용: 대괄호 변수 부분만 파란색 스타일로 강조
+            const escapedText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const highlightedText = escapedText.replace(/\[(.*?)\]/g, '<span class="text-blue-600 font-bold bg-blue-50 px-1 py-0.5 rounded border border-blue-100">[$1]</span>');
+            
+            previewBox.innerHTML = highlightedText;
         }
 
         function openTemplateModal(mode, id = null) {
@@ -662,8 +666,9 @@
             }
         }
 
+        // 복사할 때는 색상 태그가 없는 순수 일반 텍스트로 복사됨
         function copyTemplateMessage() {
-            const text = document.getElementById('preview-box').textContent;
+            const text = getProcessedMessageText();
             if (!text || text.includes('템플릿을 선택')) {
                 alert('복사할 문자 내용이 없습니다.');
                 return;
@@ -716,7 +721,7 @@
             let title = '저장된 문자';
 
             if (mode === 'template') {
-                text = document.getElementById('preview-box').textContent;
+                text = getProcessedMessageText(); // 순수 텍스트로 저장
                 const t = templates.find(item => item.id === currentSelectedTemplateId);
                 if (t) title = t.title;
             }
