@@ -318,10 +318,10 @@
     <!-- 자바스크립트 로직 -->
     <script>
         // ==========================================
-        // 🔑 SUPABASE 설정 (적용 완료)
+        // 🔑 SUPABASE 설정 (올바른 키와 URL 세팅 완료)
         // ==========================================
         const SUPABASE_URL = 'https://hnwwgjdjrxkgguudockp.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhud3dnamRqcnhrZ2d1dWRvY2twIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0NTI3ODIsImV4cCI6MjEwODAyODc4Mn0.lXR_AxaDxqFY1TvCZ1azM1LXWSIUUqsU43O6rzB1tec';
+        const SUPABASE_ANON_KEY = 'sb_publishable_0GGJULV8jinRZR2J_JH5gw_9A-zsqtE';
         
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -360,7 +360,6 @@
         ];
 
         let templates = [];
-        let savedMessages = [];
         let currentSelectedTemplateId = null;
         let currentFilter = 'all';
         let apiKey = '';
