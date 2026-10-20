@@ -27,7 +27,7 @@
                 </div>
                 <div>
                     <h1 class="text-lg font-bold tracking-tight">수원시장애인종합복지관</h1>
-                    <p class="text-xs text-teal-400 font-medium">스마트 안내 문자 및 소식지 문구 생성기 (Cloud DB 연동)</p>
+                    <p class="text-xs text-teal-400 font-medium">스마트 안내 문자 및 소식지 문구 생성기</p>
                 </div>
             </div>
 
@@ -48,10 +48,10 @@
     </header>
 
     <!-- 메인 컨테이너 -->
-    <main class="max-w-7xl w-full mx-auto px-4 py-8 flex-grow">
+    <main class="max-w-[1600px] w-full mx-auto px-4 py-6 flex-grow">
         
         <!-- 탭 네비게이션 -->
-        <div class="flex border-b border-slate-200 mb-8 overflow-x-auto">
+        <div class="flex border-b border-slate-200 mb-6 overflow-x-auto">
             <button onclick="switchTab('template')" id="tab-btn-template" class="py-3 px-6 font-semibold text-sm border-b-2 border-teal-600 text-teal-600 transition whitespace-nowrap flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
                 템플릿 문자 작성
@@ -62,60 +62,62 @@
             </button>
             <button onclick="switchTab('storage')" id="tab-btn-storage" class="py-3 px-6 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition whitespace-nowrap flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
-                나의 문자함
+                나의 문자함 (클라우드 개인 보관함)
                 <span id="saved-badge" class="ml-1 px-2 py-0.5 text-xs bg-teal-100 text-teal-800 rounded-full font-bold">0</span>
             </button>
         </div>
 
-        <!-- [탭 1] 템플릿 문자 작성 영역 -->
-        <div id="tab-content-template" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <!-- 좌측: 카테고리 및 템플릿 선택 -->
-            <div class="lg:col-span-5 space-y-6">
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="font-bold text-slate-800 text-base flex items-center gap-2">
+        <!-- [탭 1] 템플릿 문자 작성 영역 (3분할 레이아웃) -->
+        <div id="tab-content-template" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- [1] 왼쪽 영역: 템플릿 선택 -->
+            <div class="lg:col-span-4">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 h-[720px] flex flex-col">
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="font-bold text-slate-800 text-sm flex items-center gap-2">
                             <span class="w-2.5 h-2.5 rounded-full bg-teal-600"></span>
-                            템플릿 선택 (클라우드 저장)
+                            템플릿 선택
                         </h2>
                         <div class="flex gap-2">
-                            <button onclick="resetDefaultTemplates()" class="text-xs text-slate-500 hover:text-teal-600 underline font-medium">초기데이터복원</button>
-                            <button onclick="openTemplateModal('add')" class="bg-teal-600 hover:bg-teal-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition shadow-sm flex items-center gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                템플릿 추가
+                            <button onclick="resetDefaultTemplates()" class="text-[11px] text-slate-400 hover:text-teal-600 underline">초기복원</button>
+                            <button onclick="openTemplateModal('add')" class="bg-teal-600 hover:bg-teal-700 text-white text-xs px-2.5 py-1 rounded-lg font-medium transition shadow-sm flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                추가
                             </button>
                         </div>
                     </div>
 
                     <!-- 카테고리 필터 -->
-                    <div class="grid grid-cols-3 gap-1.5 bg-slate-100 p-1 rounded-xl mb-4 text-xs font-semibold">
-                        <button onclick="filterCategory('all')" id="cat-btn-all" class="py-2 rounded-lg bg-white text-teal-700 shadow-sm transition">전체</button>
-                        <button onclick="filterCategory('이용자')" id="cat-btn-이용자" class="py-2 rounded-lg text-slate-600 hover:text-slate-900 transition">이용자</button>
-                        <button onclick="filterCategory('활동지원사')" id="cat-btn-활동지원사" class="py-2 rounded-lg text-slate-600 hover:text-slate-900 transition">활동지원사</button>
-                        <button onclick="filterCategory('행정/기타')" id="cat-btn-행정기타" class="col-span-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 transition bg-slate-50 mt-1 border border-slate-200">행정/기타</button>
+                    <div class="grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-xl mb-3 text-xs font-semibold">
+                        <button onclick="filterCategory('all')" id="cat-btn-all" class="py-1.5 rounded-lg bg-white text-teal-700 shadow-sm transition">전체</button>
+                        <button onclick="filterCategory('이용자')" id="cat-btn-이용자" class="py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition">이용자</button>
+                        <button onclick="filterCategory('활동지원사')" id="cat-btn-활동지원사" class="py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition">활동지원사</button>
+                        <button onclick="filterCategory('행정/기타')" id="cat-btn-행정기타" class="col-span-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition bg-slate-50 mt-1 border border-slate-200">행정/기타</button>
                     </div>
 
-                    <!-- 템플릿 리스트 목록 (높이 조정하여 한 화면에 쾌적하게 보이도록 설정) -->
-                    <div id="template-list" class="space-y-2.5 max-h-[620px] overflow-y-auto pr-1">
+                    <!-- 템플릿 리스트 목록 -->
+                    <div id="template-list" class="space-y-2.5 overflow-y-auto pr-1 flex-grow">
                         <!-- 동적 생성 -->
                     </div>
                 </div>
             </div>
 
-            <!-- 우측: 미리보기 + 변수입력 + 복사/저장 버튼을 한 화면에 통합 -->
-            <div class="lg:col-span-7 space-y-6">
-                <!-- 1. 문자 내용 미리보기 박스 -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                    <div class="flex justify-between items-center mb-3 pb-3 border-b border-slate-100">
-                        <h2 class="font-bold text-slate-800 text-base flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                            문자 내용 미리보기
-                        </h2>
-                        <span class="text-xs bg-teal-50 text-teal-700 px-2.5 py-1 rounded-full font-medium border border-teal-100">실시간 반영</span>
-                    </div>
+            <!-- [2] 가운데 영역: 문자 내용 미리보기 및 복사/저장 버튼 -->
+            <div class="lg:col-span-4">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 h-[720px] flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-100">
+                            <h2 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                문자 내용 미리보기
+                            </h2>
+                            <span class="text-[11px] bg-teal-50 text-teal-700 px-2 py-0.5 rounded-full font-medium border border-teal-100">실시간 반영</span>
+                        </div>
 
-                    <!-- 문자 출력 박스 -->
-                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4 min-h-[160px] max-h-[220px] overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed text-slate-700 shadow-inner" id="preview-box">
-                        왼쪽에서 템플릿을 선택해 주세요.
+                        <!-- 문자 출력 박스 -->
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4 h-[420px] overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed text-slate-700 shadow-inner" id="preview-box">
+                            왼쪽에서 템플릿을 선택해 주세요.
+                        </div>
                     </div>
 
                     <!-- 액션 버튼 (위아래 배치) -->
@@ -130,26 +132,28 @@
                         </button>
                     </div>
                 </div>
+            </div>
 
-                <!-- 2. 변수 입력하기 박스 (우측 하단으로 이동하여 한 화면에 표시) -->
-                <div id="variable-form-container" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hidden">
-                    <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center justify-between">
+            <!-- [3] 오른쪽 영역: 변수 입력하기 -->
+            <div class="lg:col-span-4">
+                <div id="variable-form-container" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 h-[720px] flex flex-col hidden">
+                    <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center justify-between pb-2 border-b border-slate-100">
                         <span class="flex items-center gap-2">
                             <span class="w-2.5 h-2.5 rounded-full bg-teal-600"></span>
                             변수 입력하기
                         </span>
                         <span class="text-xs text-slate-400 font-normal">빈칸을 채워주세요</span>
                     </h3>
-                    <div id="variable-inputs" class="space-y-3 max-h-[220px] overflow-y-auto pr-1">
+                    <div id="variable-inputs" class="space-y-3 overflow-y-auto pr-1 flex-grow">
                         <!-- 동적 입력필드 -->
                     </div>
                 </div>
             </div>
+
         </div>
 
         <!-- [탭 2] AI 초안 작성 영역 -->
         <div id="tab-content-ai" class="grid grid-cols-1 lg:grid-cols-12 gap-8 hidden">
-            <!-- 좌측: AI 입력 패널 -->
             <div class="lg:col-span-5">
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
                     <h2 class="font-bold text-slate-800 text-base mb-4 flex items-center gap-2">
@@ -180,7 +184,6 @@
                 </div>
             </div>
 
-            <!-- 우측: AI 생성 결과 카드 (<1안>, <2안>) -->
             <div class="lg:col-span-7">
                 <div id="ai-result-container" class="space-y-6">
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center text-slate-400">
@@ -201,14 +204,13 @@
                     </svg>
                 </div>
                 <div>
-                    <h3 class="font-bold text-teal-900 text-sm mb-1">☁️ 안전한 클라우드 템플릿 관리 시스템</h3>
+                    <h3 class="font-bold text-teal-900 text-sm mb-1">☁️ 클라우드 개인 문자함 (기기 간 연동 & 타인 비공개)</h3>
                     <p class="text-xs text-teal-800 leading-relaxed">
-                        이제 템플릿 데이터가 Supabase 클라우드 서버에 안전하게 저장되므로, 브라우저 캐시나 쿠키를 삭제하셔도 추가/수정하신 템플릿 내용이 유실되지 않고 영구 보존됩니다!
+                        이곳에 저장되는 문자는 Supabase 서버에 안전하게 보관되어 브라우저를 초기화해도 유실되지 않으며, 오직 이 기기(선생님 본인)에서 저장한 문자들만 표시되므로 다른 동료 선생님들은 절대 볼 수 없습니다.
                     </p>
                 </div>
             </div>
 
-            <!-- 문자함 목록 카드 -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
                 <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
                     <div>
@@ -216,7 +218,7 @@
                             <span class="w-2.5 h-2.5 rounded-full bg-teal-600"></span>
                             저장된 나의 문자함
                         </h2>
-                        <p class="text-xs text-slate-500 mt-0.5">자주 사용하는 문구를 저장하고 언제든지 다시 불러와 사용하세요.</p>
+                        <p class="text-xs text-slate-500 mt-0.5">자주 사용하는 문구를 저장하고 언제든지 다시 불러와 수정·사용하세요.</p>
                     </div>
                     <button onclick="clearAllStorage()" class="text-xs text-rose-500 hover:text-rose-700 font-medium px-3 py-1.5 bg-rose-50 rounded-lg border border-rose-100 transition">전체 삭제</button>
                 </div>
@@ -234,7 +236,7 @@
         <p>수원시장애인종합복지관 스마트 안내 문자 생성기 &bull; Powered by Supabase &amp; Google Gemini API</p>
     </footer>
 
-    <!-- [모달 1] API 키 설정 및 발급 가이드 모달 -->
+    <!-- [모달 1] API 키 설정 모달 -->
     <div id="api-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-3xl shadow-xl max-w-lg w-full p-6 sm:p-8 overflow-hidden transform transition-all">
             <div class="flex justify-between items-center mb-5">
@@ -278,7 +280,7 @@
         </div>
     </div>
 
-    <!-- [모달 2] 템플릿 추가/수정 모달 -->
+    <!-- [모달 2] 공용 템플릿 추가/수정 모달 -->
     <div id="template-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-3xl shadow-xl max-w-lg w-full p-6 sm:p-8 overflow-hidden transform transition-all">
             <h3 id="template-modal-title" class="text-lg font-bold text-slate-900 mb-4">새 템플릿 추가</h3>
@@ -310,6 +312,30 @@
         </div>
     </div>
 
+    <!-- [모달 3] 나의 문자함 수정 모달 -->
+    <div id="saved-edit-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-xl max-w-lg w-full p-6 sm:p-8 overflow-hidden transform transition-all">
+            <h3 class="text-lg font-bold text-slate-900 mb-4">나의 문자 수정</h3>
+            
+            <input type="hidden" id="edit-saved-id">
+            <div class="space-y-4 text-sm">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">제목</label>
+                    <input type="text" id="modal-saved-title" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-teal-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">문자 내용</label>
+                    <textarea id="modal-saved-content" rows="6" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-sm text-slate-800 focus:outline-none focus:border-teal-500"></textarea>
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeSavedEditModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-3 px-4 rounded-xl transition text-sm">취소</button>
+                <button onclick="updateSavedMessageData()" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-medium py-3 px-4 rounded-xl transition shadow-sm text-sm">수정 완료</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 토스트 알림창 -->
     <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
@@ -318,13 +344,16 @@
 
     <!-- 자바스크립트 로직 -->
     <script>
-        // ==========================================
-        // 🔑 SUPABASE 설정
-        // ==========================================
         const SUPABASE_URL = 'https://hnwwgjdjrxkgguudockp.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhud3dnamRqcnhrZ2d1dWRvY2twIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0NTI3ODIsImV4cCI6MjEwODAyODc4Mn0.lXR_AxaDxqFY1TvCZ1azM1LXWSIUUqsU43O6rzB1tec';
         
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let userToken = localStorage.getItem('suwon_user_token');
+        if (!userToken) {
+            userToken = 'user_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+            localStorage.setItem('suwon_user_token', userToken);
+        }
 
         const DEFAULT_TEMPLATES = [
             {
@@ -360,13 +389,14 @@
         ];
 
         let templates = [];
+        let savedMessages = [];
         let currentSelectedTemplateId = null;
         let currentFilter = 'all';
         let apiKey = '';
 
         window.onload = async function() {
             await loadTemplatesFromSupabase();
-            loadSavedMessages();
+            await loadSavedMessagesFromSupabase();
             apiKey = localStorage.getItem('suwon_gemini_api_key') || '';
             updateApiStatusBadge();
 
@@ -433,7 +463,7 @@
             filtered.forEach(t => {
                 const isSelected = t.id === currentSelectedTemplateId;
                 const card = document.createElement('div');
-                card.className = `p-4 rounded-xl border transition cursor-pointer flex flex-col justify-between gap-2 ${isSelected ? 'border-teal-500 bg-teal-50/50 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300'}`;
+                card.className = `p-3.5 rounded-xl border transition cursor-pointer flex flex-col justify-between gap-1.5 ${isSelected ? 'border-teal-500 bg-teal-50/50 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300'}`;
                 card.onclick = () => selectTemplate(t.id);
 
                 let badgeColor = 'bg-slate-100 text-slate-600';
@@ -443,7 +473,7 @@
 
                 card.innerHTML = `
                     <div class="flex justify-between items-start">
-                        <span class="text-xs px-2 py-0.5 rounded-md font-medium ${badgeColor}">${t.category}</span>
+                        <span class="text-[11px] px-2 py-0.5 rounded-md font-medium ${badgeColor}">${t.category}</span>
                         <div class="flex items-center gap-1" onclick="event.stopPropagation()">
                             <button onclick="openTemplateModal('edit', '${t.id}')" class="p-1 text-slate-400 hover:text-teal-600 transition" title="수정">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
@@ -453,8 +483,8 @@
                             </button>
                         </div>
                     </div>
-                    <h4 class="font-bold text-slate-800 text-sm">${t.title}</h4>
-                    <p class="text-xs text-slate-500 line-clamp-2">${t.content}</p>
+                    <h4 class="font-bold text-slate-800 text-xs">${t.title}</h4>
+                    <p class="text-[11px] text-slate-500 line-clamp-2">${t.content}</p>
                 `;
                 listEl.appendChild(card);
             });
@@ -466,9 +496,9 @@
                 const btn = document.getElementById(`cat-btn-${c}`);
                 if (btn) {
                     if (c === cat || (cat === '행정/기타' && c === '행정기타')) {
-                        btn.className = 'py-2 rounded-lg bg-white text-teal-700 shadow-sm transition font-semibold';
+                        btn.className = 'py-1.5 rounded-lg bg-white text-teal-700 shadow-sm transition font-semibold';
                     } else {
-                        btn.className = 'py-2 rounded-lg text-slate-600 hover:text-slate-900 transition';
+                        btn.className = 'py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition';
                     }
                 }
             });
@@ -499,7 +529,7 @@
                     const div = document.createElement('div');
                     div.innerHTML = `
                         <label class="block text-xs font-semibold text-slate-600 mb-1">${v}</label>
-                        <input type="text" data-var="${v}" oninput="updatePreview()" placeholder="${v} 입력" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-teal-500 var-input">
+                        <input type="text" data-var="${v}" oninput="updatePreview()" placeholder="${v} 입력" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-800 focus:outline-none focus:border-teal-500 var-input">
                     `;
                     inputsContainer.appendChild(div);
                 });
@@ -579,7 +609,7 @@
                         .eq('id', id);
 
                     if (error) throw error;
-                    showToast('클라우드 템플릿이 수정되었습니다.');
+                    showToast('템플릿이 수정되었습니다.');
                 } else {
                     const newId = 't_' + Date.now();
                     const { error } = await supabaseClient
@@ -587,7 +617,7 @@
                         .insert([{ id: newId, title, category, content }]);
 
                     if (error) throw error;
-                    showToast('클라우드에 새 템플릿이 추가되었습니다.');
+                    showToast('새 템플릿이 추가되었습니다.');
                 }
 
                 closeTemplateModal();
@@ -599,7 +629,7 @@
         }
 
         async function deleteTemplate(id) {
-            if (confirm('정말 이 템플릿을 클라우드에서 삭제하시겠습니까?')) {
+            if (confirm('정말 이 템플릿을 삭제하시겠습니까?')) {
                 try {
                     const { error } = await supabaseClient
                         .from('templates')
@@ -640,10 +670,221 @@
                 }
             });
             if (tabName === 'storage') {
+                loadSavedMessagesFromSupabase();
+            }
+        }
+
+        // ==========================================
+        // ☁️ 개인 문자함 관리 및 수정 기능
+        // ==========================================
+        async function loadSavedMessagesFromSupabase() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('saved_messages')
+                    .select('*')
+                    .eq('user_token', userToken);
+
+                if (error) throw error;
+                savedMessages = data || [];
+                renderSavedMessages();
+                updateSavedBadge();
+            } catch (err) {
+                console.error('개인 문자함 로드 실패:', err);
+                savedMessages = [];
                 renderSavedMessages();
             }
         }
 
+        async function saveCurrentToStorage(mode) {
+            let text = '';
+            let title = '저장된 문자';
+
+            if (mode === 'template') {
+                text = document.getElementById('preview-box').textContent;
+                const t = templates.find(item => item.id === currentSelectedTemplateId);
+                if (t) title = t.title;
+            }
+
+            if (!text || text.includes('템플릿을 선택')) {
+                alert('저장할 문자 내용이 없습니다.');
+                return;
+            }
+
+            const newMsg = {
+                id: 'saved_' + Date.now(),
+                user_token: userToken,
+                title: title,
+                date: new Date().toLocaleDateString(),
+                content: text
+            };
+
+            try {
+                const { error } = await supabaseClient
+                    .from('saved_messages')
+                    .insert([newMsg]);
+
+                if (error) throw error;
+
+                await loadSavedMessagesFromSupabase();
+                showToast('클라우드 개인 문자함에 안전하게 저장되었습니다.');
+            } catch (err) {
+                alert('저장 중 오류 발생: ' + err.message);
+            }
+        }
+
+        async function saveAiDraftToStorage(idx) {
+            const text = document.getElementById(`ai-draft-${idx}`).textContent;
+            if (!text) return;
+
+            const newMsg = {
+                id: 'saved_' + Date.now(),
+                user_token: userToken,
+                title: `AI 초안 ${idx + 1}안`,
+                date: new Date().toLocaleDateString(),
+                content: text
+            };
+
+            try {
+                const { error } = await supabaseClient
+                    .from('saved_messages')
+                    .insert([newMsg]);
+
+                if (error) throw error;
+
+                await loadSavedMessagesFromSupabase();
+                showToast('클라우드 개인 문자함에 저장되었습니다.');
+            } catch (err) {
+                alert('저장 중 오류 발생: ' + err.message);
+            }
+        }
+
+        function updateSavedBadge() {
+            const badge = document.getElementById('saved-badge');
+            if (badge) badge.textContent = savedMessages.length;
+        }
+
+        function renderSavedMessages() {
+            const listEl = document.getElementById('saved-messages-list');
+            listEl.innerHTML = '';
+
+            if (savedMessages.length === 0) {
+                listEl.innerHTML = '<div class="col-span-2 text-center py-12 text-slate-400 text-xs">저장된 문자가 없습니다. 문자 작성 후 [문자함에 저장] 버튼을 눌러보세요.</div>';
+                return;
+            }
+
+            savedMessages.forEach((msg) => {
+                const card = document.createElement('div');
+                card.className = 'bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col justify-between gap-3 shadow-sm';
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="font-bold text-slate-800 text-sm">${msg.title}</h4>
+                            <span class="text-xs text-slate-400">${msg.date}</span>
+                        </div>
+                        <p class="text-xs text-slate-600 whitespace-pre-wrap line-clamp-3 leading-relaxed">${msg.content}</p>
+                    </div>
+                    <div class="flex gap-2 pt-2 border-t border-slate-200/60">
+                        <button onclick="copySavedMessage('${msg.id}')" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white text-xs py-2 px-3 rounded-xl font-medium transition flex items-center justify-center gap-1 shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                            복사하기
+                        </button>
+                        <button onclick="openSavedEditModal('${msg.id}')" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs py-2 px-3 rounded-xl font-medium transition">수정</button>
+                        <button onclick="deleteSavedMessage('${msg.id}')" class="bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 text-xs py-2 px-3 rounded-xl font-medium transition">삭제</button>
+                    </div>
+                `;
+                listEl.appendChild(card);
+            });
+        }
+
+        function copySavedMessage(id) {
+            const msg = savedMessages.find(m => m.id === id);
+            if (msg) {
+                navigator.clipboard.writeText(msg.content).then(() => {
+                    showToast('클립보드에 복사되었습니다.');
+                });
+            }
+        }
+
+        function openSavedEditModal(id) {
+            const msg = savedMessages.find(m => m.id === id);
+            if (!msg) return;
+
+            document.getElementById('edit-saved-id').value = msg.id;
+            document.getElementById('modal-saved-title').value = msg.title;
+            document.getElementById('modal-saved-content').value = msg.content;
+            document.getElementById('saved-edit-modal').classList.remove('hidden');
+        }
+
+        function closeSavedEditModal() {
+            document.getElementById('saved-edit-modal').classList.add('hidden');
+        }
+
+        async function updateSavedMessageData() {
+            const id = document.getElementById('edit-saved-id').value;
+            const title = document.getElementById('modal-saved-title').value.trim();
+            const content = document.getElementById('modal-saved-content').value.trim();
+
+            if (!title || !content) {
+                alert('제목과 내용을 모두 입력해 주세요.');
+                return;
+            }
+
+            try {
+                const { error } = await supabaseClient
+                    .from('saved_messages')
+                    .update({ title, content })
+                    .eq('id', id)
+                    .eq('user_token', userToken);
+
+                if (error) throw error;
+
+                closeSavedEditModal();
+                await loadSavedMessagesFromSupabase();
+                showToast('저장된 문자가 수정되었습니다.');
+            } catch (err) {
+                alert('수정 중 오류 발생: ' + err.message);
+            }
+        }
+
+        async function deleteSavedMessage(id) {
+            if (confirm('이 저장된 문자를 삭제하시겠습니까?')) {
+                try {
+                    const { error } = await supabaseClient
+                        .from('saved_messages')
+                        .delete()
+                        .eq('id', id);
+
+                    if (error) throw error;
+
+                    await loadSavedMessagesFromSupabase();
+                    showToast('삭제되었습니다.');
+                } catch (err) {
+                    alert('삭제 중 오류 발생: ' + err.message);
+                }
+            }
+        }
+
+        async function clearAllStorage() {
+            if (confirm('나의 문자함에 저장된 모든 내용을 삭제하시겠습니까?')) {
+                try {
+                    const { error } = await supabaseClient
+                        .from('saved_messages')
+                        .delete()
+                        .eq('user_token', userToken);
+
+                    if (error) throw error;
+
+                    await loadSavedMessagesFromSupabase();
+                    showToast('문자함이 비워졌습니다.');
+                } catch (err) {
+                    alert('전체 삭제 중 오류 발생: ' + err.message);
+                }
+            }
+        }
+
+        // ==========================================
+        // AI 초안 관련 로직
+        // ==========================================
         async function generateAiDraft() {
             if (!apiKey) {
                 openApiKeyModal();
@@ -774,127 +1015,9 @@
             });
         }
 
-        function saveAiDraftToStorage(idx) {
-            const text = document.getElementById(`ai-draft-${idx}`).textContent;
-            if (!text) return;
-            let savedMessages = JSON.parse(localStorage.getItem('suwon_saved_messages') || '[]');
-            const newMsg = {
-                id: 'saved_' + Date.now(),
-                title: `AI 초안 ${idx + 1}안`,
-                date: new Date().toLocaleDateString(),
-                content: text
-            };
-            savedMessages.unshift(newMsg);
-            localStorage.setItem('suwon_saved_messages', JSON.stringify(savedMessages));
-            updateSavedBadge();
-            showToast('나의 문자함에 저장되었습니다.');
-        }
-
-        function loadSavedMessages() {
-            let savedMessages = JSON.parse(localStorage.getItem('suwon_saved_messages') || '[]');
-            const badge = document.getElementById('saved-badge');
-            if (badge) badge.textContent = savedMessages.length;
-        }
-
-        function updateSavedBadge() {
-            loadSavedMessages();
-        }
-
-        function saveCurrentToStorage(mode) {
-            let text = '';
-            let title = '저장된 문자';
-
-            if (mode === 'template') {
-                text = document.getElementById('preview-box').textContent;
-                const t = templates.find(item => item.id === currentSelectedTemplateId);
-                if (t) title = t.title;
-            }
-
-            if (!text || text.includes('템플릿을 선택')) {
-                alert('저장할 문자 내용이 없습니다.');
-                return;
-            }
-
-            let savedMessages = JSON.parse(localStorage.getItem('suwon_saved_messages') || '[]');
-            const newMsg = {
-                id: 'saved_' + Date.now(),
-                title: title,
-                date: new Date().toLocaleDateString(),
-                content: text
-            };
-            savedMessages.unshift(newMsg);
-            localStorage.setItem('suwon_saved_messages', JSON.stringify(savedMessages));
-            updateSavedBadge();
-            showToast('나의 문자함에 안전하게 저장되었습니다.');
-        }
-
-        function renderSavedMessages() {
-            const listEl = document.getElementById('saved-messages-list');
-            listEl.innerHTML = '';
-            let savedMessages = JSON.parse(localStorage.getItem('suwon_saved_messages') || '[]');
-
-            if (savedMessages.length === 0) {
-                listEl.innerHTML = '<div class="col-span-2 text-center py-12 text-slate-400 text-xs">저장된 문자가 없습니다. 문자 작성 후 [문자함에 저장] 버튼을 눌러보세요.</div>';
-                return;
-            }
-
-            savedMessages.forEach((msg) => {
-                const card = document.createElement('div');
-                card.className = 'bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col justify-between gap-3 shadow-sm';
-                card.innerHTML = `
-                    <div>
-                        <div class="flex justify-between items-center mb-2">
-                            <h4 class="font-bold text-slate-800 text-sm">${msg.title}</h4>
-                            <span class="text-xs text-slate-400">${msg.date}</span>
-                        </div>
-                        <p class="text-xs text-slate-600 whitespace-pre-wrap line-clamp-3 leading-relaxed">${msg.content}</p>
-                    </div>
-                    <div class="flex gap-2 pt-2 border-t border-slate-200/60">
-                        <button onclick="copySavedMessage('${msg.id}')" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white text-xs py-2 px-3 rounded-xl font-medium transition flex items-center justify-center gap-1 shadow-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
-                            복사하기
-                        </button>
-                        <button onclick="deleteSavedMessage('${msg.id}')" class="bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 text-xs py-2 px-3 rounded-xl font-medium transition">삭제</button>
-                    </div>
-                `;
-                listEl.appendChild(card);
-            });
-        }
-
-        function copySavedMessage(id) {
-            let savedMessages = JSON.parse(localStorage.getItem('suwon_saved_messages') || '[]');
-            const msg = savedMessages.find(m => m.id === id);
-            if (msg) {
-                navigator.clipboard.writeText(msg.content).then(() => {
-                    showToast('클립보드에 복사되었습니다.');
-                });
-            }
-        }
-
-        function deleteSavedMessage(id) {
-            if (confirm('이 저장된 문자를 삭제하시겠습니까?')) {
-                let savedMessages = JSON.parse(localStorage.getItem('suwon_saved_messages') || '[]');
-                savedMessages = savedMessages.filter(m => m.id !== id);
-                localStorage.setItem('suwon_saved_messages', JSON.stringify(savedMessages));
-                renderSavedMessages();
-                updateSavedBadge();
-                showToast('삭제되었습니다.');
-            }
-        }
-
-        function clearAllStorage() {
-            if (confirm('나의 문자함에 저장된 모든 내용을 삭제하시겠습니까?')) {
-                localStorage.removeItem('suwon_saved_messages');
-                renderSavedMessages();
-                updateSavedBadge();
-                showToast('문자함이 비워졌습니다.');
-            }
-        }
-
-        function openApiKeyManager() {
-            openApiKeyModal();
-        }
-
+        // ==========================================
+        // API 키 모달 관련
+        // ==========================================
         function openApiKeyModal() {
             document.getElementById('api-key-input').value = apiKey;
             document.getElementById('api-modal').classList.remove('hidden');
