@@ -6,6 +6,8 @@
     <title>수원시장애인종합복지관 스마트 문자 생성기</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Supabase JS Client CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -25,7 +27,7 @@
                 </div>
                 <div>
                     <h1 class="text-lg font-bold tracking-tight">수원시장애인종합복지관</h1>
-                    <p class="text-xs text-teal-400 font-medium">스마트 안내 문자 및 소식지 문구 생성기</p>
+                    <p class="text-xs text-teal-400 font-medium">스마트 안내 문자 및 소식지 문구 생성기 (Cloud DB 연동)</p>
                 </div>
             </div>
 
@@ -73,10 +75,10 @@
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="font-bold text-slate-800 text-base flex items-center gap-2">
                             <span class="w-2.5 h-2.5 rounded-full bg-teal-600"></span>
-                            템플릿 선택
+                            템플릿 선택 (클라우드 저장)
                         </h2>
                         <div class="flex gap-2">
-                            <button onclick="resetDefaultTemplates()" class="text-xs text-slate-500 hover:text-teal-600 underline font-medium">기본복원</button>
+                            <button onclick="resetDefaultTemplates()" class="text-xs text-slate-500 hover:text-teal-600 underline font-medium">초기데이터복원</button>
                             <button onclick="openTemplateModal('add')" class="bg-teal-600 hover:bg-teal-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition shadow-sm flex items-center gap-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                 템플릿 추가
@@ -191,18 +193,16 @@
 
         <!-- [탭 3] 나의 문자함 영역 -->
         <div id="tab-content-storage" class="hidden space-y-6">
-            <!-- 캐시/쿠키 삭제 관련 경고 안내문 -->
-            <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex items-start gap-3.5 shadow-sm">
-                <div class="bg-amber-100 p-2 rounded-xl text-amber-600 mt-0.5">
+            <div class="bg-teal-50 border border-teal-200 rounded-2xl p-5 flex items-start gap-3.5 shadow-sm">
+                <div class="bg-teal-100 p-2 rounded-xl text-teal-700 mt-0.5">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
                 </div>
                 <div>
-                    <h3 class="font-bold text-amber-900 text-sm mb-1">⚠️ 브라우저 데이터(캐시/쿠키) 삭제 시 주의 안내</h3>
-                    <p class="text-xs text-amber-800 leading-relaxed">
-                        작성하신 문자함 및 맞춤 템플릿은 중앙 서버가 아닌 <strong>현재 사용 중인 웹 브라우저의 저장소(Local Storage)</strong>에 안전하게 보관됩니다. 
-                        따라서 브라우저 설정에서 <strong>'방문 기록 삭제', '쿠키 및 사이트 데이터 삭제', '캐시 삭제'</strong> 등을 진행하실 경우 저장된 문자 내용이 모두 사라질 수 있으니 이 점 유의해 주세요!
+                    <h3 class="font-bold text-teal-900 text-sm mb-1">☁️ 안전한 클라우드 템플릿 관리 시스템</h3>
+                    <p class="text-xs text-teal-800 leading-relaxed">
+                        이제 템플릿 데이터가 Supabase 클라우드 서버에 안전하게 저장되므로, 브라우저 캐시나 쿠키를 삭제하셔도 추가/수정하신 템플릿 내용이 유실되지 않고 영구 보존됩니다!
                     </p>
                 </div>
             </div>
@@ -230,7 +230,7 @@
 
     <!-- 푸터 -->
     <footer class="bg-white border-t border-slate-200 py-6 mt-12 text-center text-xs text-slate-500">
-        <p>수원시장애인종합복지관 스마트 안내 문자 생성기 &bull; Powered by Google Gemini API</p>
+        <p>수원시장애인종합복지관 스마트 안내 문자 생성기 &bull; Powered by Supabase &amp; Google Gemini API</p>
     </footer>
 
     <!-- [모달 1] API 키 설정 및 발급 가이드 모달 -->
@@ -317,7 +317,15 @@
 
     <!-- 자바스크립트 로직 -->
     <script>
-        // 기본 템플릿 데이터 초기값 (수정 및 삭제 가능)
+        // ==========================================
+        // 🔑 SUPABASE 설정 (적용 완료)
+        // ==========================================
+        const SUPABASE_URL = 'https://hnwwgjdjrxkgguudockp.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhud3dnamRqcnhrZ2d1dWRvY2twIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0NTI3ODIsImV4cCI6MjEwODAyODc4Mn0.lXR_AxaDxqFY1TvCZ1azM1LXWSIUUqsU43O6rzB1tec';
+        
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // 기본 템플릿 초기값 (DB가 비어있을 때 자동 삽입용)
         const DEFAULT_TEMPLATES = [
             {
                 id: 't1',
@@ -341,7 +349,7 @@
                 id: 't4',
                 title: '활동지원사 서류 제출 안내',
                 category: '활동지원사',
-                content: '안녕하세요 선생님, 수원시장애인종합복지관입니다. 다월 활동지원 급여 청구를 위한 [서류명]을 [마감일]까지 제출해 주시기 바랍니다.'
+                content: '안녕하세요 선생님, 수원시장애인종합복지관입니다. 이번 달 활동지원 급여 청구를 위한 [서류명]을 [마감일]까지 제출해 주시기 바랍니다.'
             },
             {
                 id: 't5',
@@ -358,53 +366,59 @@
         let apiKey = '';
 
         // 초기 실행
-        window.onload = function() {
-            loadTemplates();
+        window.onload = async function() {
+            await loadTemplatesFromSupabase();
             loadSavedMessages();
             apiKey = localStorage.getItem('suwon_gemini_api_key') || '';
             updateApiStatusBadge();
 
             if (!apiKey) {
-                // 첫 진입 시 키가 없으면 모달 띄우기
                 openApiKeyModal();
-            }
-
-            if (templates.length > 0) {
-                selectTemplate(templates[0].id);
             }
         };
 
-        // 템플릿 데이터 로드 (localStorage 연동)
-        function loadTemplates() {
-            const stored = localStorage.getItem('suwon_custom_templates');
-            if (stored) {
-                try {
-                    templates = JSON.parse(stored);
-                } catch (e) {
+        // Supabase에서 템플릿 불러오기
+        async function loadTemplatesFromSupabase() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('templates')
+                    .select('*');
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    for (const t of DEFAULT_TEMPLATES) {
+                        await supabaseClient.from('templates').insert([t]);
+                    }
                     templates = [...DEFAULT_TEMPLATES];
+                } else {
+                    templates = data;
                 }
-            } else {
+            } catch (err) {
+                console.error('Supabase 데이터 로드 실패:', err);
                 templates = [...DEFAULT_TEMPLATES];
-                saveTemplatesToStorage();
             }
             renderTemplateList();
-        }
-
-        function saveTemplatesToStorage() {
-            localStorage.setItem('suwon_custom_templates', JSON.stringify(templates));
-        }
-
-        function resetDefaultTemplates() {
-            if (confirm('기본 템플릿으로 초기화하시겠습니까? (추가/수정된 내역이 초기화됩니다)')) {
-                templates = [...DEFAULT_TEMPLATES];
-                saveTemplatesToStorage();
-                renderTemplateList();
-                if (templates.length > 0) selectTemplate(templates[0].id);
-                showToast('기본 템플릿으로 복원되었습니다.');
+            if (templates.length > 0) {
+                selectTemplate(templates[0].id);
             }
         }
 
-        // 템플릿 리스트 렌더링
+        async function resetDefaultTemplates() {
+            if (confirm('기본 템플릿으로 초기화하시겠습니까? (클라우드 데이터가 초기화됩니다)')) {
+                try {
+                    await supabaseClient.from('templates').delete().neq('id', '0');
+                    for (const t of DEFAULT_TEMPLATES) {
+                        await supabaseClient.from('templates').insert([t]);
+                    }
+                    await loadTemplatesFromSupabase();
+                    showToast('클라우드 템플릿이 초기화되었습니다.');
+                } catch (err) {
+                    alert('초기화 중 오류 발생: ' + err.message);
+                }
+            }
+        }
+
         function renderTemplateList() {
             const listEl = document.getElementById('template-list');
             listEl.innerHTML = '';
@@ -464,7 +478,6 @@
             renderTemplateList();
         }
 
-        // 템플릿 선택 및 변수 추출
         function selectTemplate(id) {
             currentSelectedTemplateId = id;
             renderTemplateList();
@@ -472,7 +485,6 @@
             const t = templates.find(item => item.id === id);
             if (!t) return;
 
-            // 대괄호 변수 추출 (예: [이름], [날짜])
             const regex = /\[(.*?)\]/g;
             let matches;
             const variables = new Set();
@@ -501,7 +513,6 @@
             updatePreview();
         }
 
-        // 실시간 미리보기 갱신
         function updatePreview() {
             const t = templates.find(item => item.id === currentSelectedTemplateId);
             const previewBox = document.getElementById('preview-box');
@@ -521,7 +532,6 @@
             previewBox.textContent = text;
         }
 
-        // 템플릿 추가/수정 모달 조작
         function openTemplateModal(mode, id = null) {
             const modal = document.getElementById('template-modal');
             const titleEl = document.getElementById('template-modal-title');
@@ -553,7 +563,7 @@
             document.getElementById('template-modal').classList.add('hidden');
         }
 
-        function saveTemplateData() {
+        async function saveTemplateData() {
             const id = document.getElementById('edit-template-id').value;
             const title = document.getElementById('modal-tpl-title').value.trim();
             const category = document.getElementById('modal-tpl-category').value;
@@ -564,46 +574,51 @@
                 return;
             }
 
-            if (id) {
-                // 수정
-                const idx = templates.findIndex(t => t.id === id);
-                if (idx !== -1) {
-                    templates[idx] = { id, title, category, content };
-                }
-                showToast('템플릿이 수정되었습니다.');
-            } else {
-                // 추가
-                const newId = 't_' + Date.now();
-                templates.push({ id: newId, title, category, content });
-                showToast('새 템플릿이 추가되었습니다.');
-            }
+            try {
+                if (id) {
+                    const { error } = await supabaseClient
+                        .from('templates')
+                        .update({ title, category, content })
+                        .eq('id', id);
 
-            saveTemplatesToStorage();
-            closeTemplateModal();
-            renderTemplateList();
-            if (!id && templates.length > 0) {
-                selectTemplate(templates[templates.length - 1].id);
-            } else if (id) {
-                selectTemplate(id);
-            }
-        }
-
-        function deleteTemplate(id) {
-            if (confirm('정말 이 템플릿을 삭제하시겠습니까?')) {
-                templates = templates.filter(t => t.id !== id);
-                saveTemplatesToStorage();
-                renderTemplateList();
-                if (templates.length > 0) {
-                    selectTemplate(templates[0].id);
+                    if (error) throw error;
+                    showToast('클라우드 템플릿이 수정되었습니다.');
                 } else {
-                    document.getElementById('preview-box').textContent = '등록된 템플릿이 없습니다.';
-                    document.getElementById('variable-form-container').classList.add('hidden');
+                    const newId = 't_' + Date.now();
+                    const { error } = await supabaseClient
+                        .from('templates')
+                        .insert([{ id: newId, title, category, content }]);
+
+                    if (error) throw error;
+                    showToast('클라우드에 새 템플릿이 추가되었습니다.');
                 }
-                showToast('템플릿이 삭제되었습니다.');
+
+                closeTemplateModal();
+                await loadTemplatesFromSupabase();
+                if (id) selectTemplate(id);
+            } catch (err) {
+                alert('저장 중 오류 발생: ' + err.message);
             }
         }
 
-        // 복사하기
+        async function deleteTemplate(id) {
+            if (confirm('정말 이 템플릿을 클라우드에서 삭제하시겠습니까?')) {
+                try {
+                    const { error } = await supabaseClient
+                        .from('templates')
+                        .delete()
+                        .eq('id', id);
+
+                    if (error) throw error;
+
+                    await loadTemplatesFromSupabase();
+                    showToast('템플릿이 삭제되었습니다.');
+                } catch (err) {
+                    alert('삭제 중 오류 발생: ' + err.message);
+                }
+            }
+        }
+
         function copyTemplateMessage() {
             const text = document.getElementById('preview-box').textContent;
             if (!text || text.includes('템플릿을 선택')) {
@@ -615,7 +630,6 @@
             });
         }
 
-        // [탭 전환]
         function switchTab(tabName) {
             ['template', 'ai', 'storage'].forEach(t => {
                 const btn = document.getElementById(`tab-btn-${t}`);
@@ -633,7 +647,6 @@
             }
         }
 
-        // --- AI 초안 생성 로직 ---
         async function generateAiDraft() {
             if (!apiKey) {
                 openApiKeyModal();
@@ -712,7 +725,6 @@
             const container = document.getElementById('ai-result-container');
             container.innerHTML = '';
 
-            // 파싱 처리
             let draft1 = '';
             let draft2 = '';
 
@@ -768,6 +780,7 @@
         function saveAiDraftToStorage(idx) {
             const text = document.getElementById(`ai-draft-${idx}`).textContent;
             if (!text) return;
+            let savedMessages = JSON.parse(localStorage.getItem('suwon_saved_messages') || '[]');
             const newMsg = {
                 id: 'saved_' + Date.now(),
                 title: `AI 초안 ${idx + 1}안`,
@@ -775,31 +788,19 @@
                 content: text
             };
             savedMessages.unshift(newMsg);
-            saveSavedMessagesToStorage();
+            localStorage.setItem('suwon_saved_messages', JSON.stringify(savedMessages));
+            updateSavedBadge();
             showToast('나의 문자함에 저장되었습니다.');
         }
 
-        // --- 나의 문자함 (Storage) 로직 ---
         function loadSavedMessages() {
-            const stored = localStorage.getItem('suwon_saved_messages');
-            if (stored) {
-                try {
-                    savedMessages = JSON.parse(stored);
-                } catch (e) {
-                    savedMessages = [];
-                }
-            }
-            updateSavedBadge();
-        }
-
-        function saveSavedMessagesToStorage() {
-            localStorage.setItem('suwon_saved_messages', JSON.stringify(savedMessages));
-            updateSavedBadge();
+            let savedMessages = JSON.parse(localStorage.getItem('suwon_saved_messages') || '[]');
+            const badge = document.getElementById('saved-badge');
+            if (badge) badge.textContent = savedMessages.length;
         }
 
         function updateSavedBadge() {
-            const badge = document.getElementById('saved-badge');
-            if (badge) badge.textContent = savedMessages.length;
+            loadSavedMessages();
         }
 
         function saveCurrentToStorage(mode) {
@@ -817,6 +818,7 @@
                 return;
             }
 
+            let savedMessages = JSON.parse(localStorage.getItem('suwon_saved_messages') || '[]');
             const newMsg = {
                 id: 'saved_' + Date.now(),
                 title: title,
@@ -824,13 +826,15 @@
                 content: text
             };
             savedMessages.unshift(newMsg);
-            saveSavedMessagesToStorage();
+            localStorage.setItem('suwon_saved_messages', JSON.stringify(savedMessages));
+            updateSavedBadge();
             showToast('나의 문자함에 안전하게 저장되었습니다.');
         }
 
         function renderSavedMessages() {
             const listEl = document.getElementById('saved-messages-list');
             listEl.innerHTML = '';
+            let savedMessages = JSON.parse(localStorage.getItem('suwon_saved_messages') || '[]');
 
             if (savedMessages.length === 0) {
                 listEl.innerHTML = '<div class="col-span-2 text-center py-12 text-slate-400 text-xs">저장된 문자가 없습니다. 문자 작성 후 [문자함에 저장] 버튼을 눌러보세요.</div>';
@@ -861,6 +865,7 @@
         }
 
         function copySavedMessage(id) {
+            let savedMessages = JSON.parse(localStorage.getItem('suwon_saved_messages') || '[]');
             const msg = savedMessages.find(m => m.id === id);
             if (msg) {
                 navigator.clipboard.writeText(msg.content).then(() => {
@@ -871,23 +876,24 @@
 
         function deleteSavedMessage(id) {
             if (confirm('이 저장된 문자를 삭제하시겠습니까?')) {
+                let savedMessages = JSON.parse(localStorage.getItem('suwon_saved_messages') || '[]');
                 savedMessages = savedMessages.filter(m => m.id !== id);
-                saveSavedMessagesToStorage();
+                localStorage.setItem('suwon_saved_messages', JSON.stringify(savedMessages));
                 renderSavedMessages();
+                updateSavedBadge();
                 showToast('삭제되었습니다.');
             }
         }
 
         function clearAllStorage() {
             if (confirm('나의 문자함에 저장된 모든 내용을 삭제하시겠습니까?')) {
-                savedMessages = [];
-                saveSavedMessagesToStorage();
+                localStorage.removeItem('suwon_saved_messages');
                 renderSavedMessages();
+                updateSavedBadge();
                 showToast('문자함이 비워졌습니다.');
             }
         }
 
-        // --- API 키 모달 관리 ---
         function openApiKeyModal() {
             document.getElementById('api-key-input').value = apiKey;
             document.getElementById('api-modal').classList.remove('hidden');
@@ -930,7 +936,6 @@
             }
         }
 
-        // 토스트 알림 표시
         function showToast(msg) {
             const toast = document.getElementById('toast');
             document.getElementById('toast-msg').textContent = msg;
